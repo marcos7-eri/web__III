@@ -1,0 +1,95 @@
+﻿@page
+@model crudsweb3.Pages.EditModel
+
+@{
+    ViewData["Title"] = "Editar tarea";
+}
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-1">✏️ Editar tarea</h1>
+            <p class="text-muted mb-0">Actualiza los datos de la tarea seleccionada</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-page="./Index" class="btn btn-outline-secondary shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i>Volver a la lista
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <form method="post" novalidate>
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <input type="hidden" asp-for="Tarea.Id" />
+
+                <div class="mb-3">
+                    <label asp-for="Tarea.nombreTarea" class="form-label fw-semibold"></label>
+                    <input asp-for="Tarea.nombreTarea" class="form-control" placeholder="Ej: Comprar insumos" />
+                    <span asp-validation-for="Tarea.nombreTarea" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Tarea.fechaVencimiento" class="form-label fw-semibold"></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        <input asp-for="Tarea.fechaVencimiento" type="datetime-local" class="form-control" />
+                    </div>
+                    <span asp-validation-for="Tarea.fechaVencimiento" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Tarea.estado" class="form-label fw-semibold"></label>
+                    <select asp-for="Tarea.estado" class="form-select">
+                        <option value="">-- Selecciona un estado --</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                        <option value="Completado">Completado</option>
+                    </select>
+                    <span asp-validation-for="Tarea.estado" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Tarea.IdUsuario" class="form-label fw-semibold"></label>
+                    <input asp-for="Tarea.IdUsuario" class="form-control" placeholder="Ej: 101" />
+                    <span asp-validation-for="Tarea.IdUsuario" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary shadow-sm">
+                        <i class="fas fa-save me-1"></i>Guardar
+                    </button>
+                    <a asp-page="./Index" class="btn btn-outline-secondary shadow-sm">
+                        <i class="fas fa-times me-1"></i>Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<style>
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .btn {
+        min-width: 120px;
+    }
+
+    .card {
+        border-radius: 0.75rem;
+    }
+</style>

@@ -1,0 +1,73 @@
+﻿@page
+@model crudsweb3.Pages.DeleteModel
+@{
+    ViewData["Title"] = "Eliminar tarea";
+}
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-1 text-danger">🗑️ Eliminar tarea</h1>
+            <p class="text-muted mb-0">Confirma si deseas borrar definitivamente esta tarea</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-page="./Index" class="btn btn-outline-secondary shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i>Volver a la lista
+            </a>
+        </div>
+    </div>
+    <div class="alert alert-warning shadow-sm" role="alert">
+        <strong>⚠️ Atención:</strong> Esta acción no se puede deshacer.
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(m => m.Tarea.nombreTarea)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(m => m.Tarea.nombreTarea)</dd>
+
+                <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(m => m.Tarea.fechaVencimiento)</dt>
+                <dd class="col-sm-9">
+                    @{
+                        string fechaDisplay = Model.Tarea.fechaVencimiento == null
+                        ? "Sin fecha límite"
+                        : string.Format("{0:dd/MM/yyyy HH:mm}", Model.Tarea.fechaVencimiento);
+                    }
+                    @fechaDisplay
+                </dd>
+
+                <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(m => m.Tarea.estado)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(m => m.Tarea.estado)</dd>
+
+                <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(m => m.Tarea.IdUsuario)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(m => m.Tarea.IdUsuario)</dd>
+            </dl>
+        </div>
+    </div>
+
+    <form method="post" class="d-flex gap-2">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Tarea.Id" />
+
+        <button type="submit" class="btn btn-danger shadow-sm">
+            <i class="fas fa-trash-alt me-1"></i>Eliminar
+        </button>
+        <a asp-page="./Index" class="btn btn-outline-secondary shadow-sm">
+            <i class="fas fa-times me-1"></i>Cancelar
+        </a>
+    </form>
+</div>
+
+<style>
+    dt {
+        color: #2c3e50;
+    }
+
+    .card {
+        border-radius: 0.75rem;
+    }
+
+    .btn {
+        min-width: 130px;
+    }
+</style>

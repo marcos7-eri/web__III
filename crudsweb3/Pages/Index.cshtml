@@ -1,0 +1,283 @@
+﻿@page
+@model crudsweb3.Pages.IndexModel
+
+@{
+    ViewData["Title"] = "Tareas";
+}
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h2 mb-1">📋 Gestión de Tareas</h1>
+            <p class="text-muted mb-0">Organiza y administra todas tus tareas</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-page="Create" class="btn btn-primary btn-lg shadow-sm">
+                <i class="fas fa-plus me-2"></i>Nueva Tarea
+            </a>
+        </div>
+    </div>
+
+    @if (Model.Tarea != null && Model.Tarea.Any())
+    {
+        <div class="row mb-4">
+            @{
+                var totalTareas = Model.Tarea.Count();
+                var tareasActivas = Model.Tarea.Count(t =>
+                (t.estado ?? "").Trim().ToLowerInvariant() is "activo" or "activa" or "completado" or "completada" or "true");
+                var tareasPendientes = Model.Tarea.Count(t =>
+                (t.estado ?? "").Trim().ToLowerInvariant() == "pendiente");
+                var tareasVencidas = Model.Tarea.Count(t =>
+                t.fechaVencimiento < DateTime.Now);  
+            }
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-tasks fa-2x opacity-75"></i>
+                        </div>
+                        <div>
+                            <div class="h3 mb-0">@totalTareas</div>
+                            <div class="small">Total Tareas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                        </div>
+                        <div>
+                            <div class="h3 mb-0">@tareasActivas</div>
+                            <div class="small">Activas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card bg-warning text-white h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-clock fa-2x opacity-75"></i>
+                        </div>
+                        <div>
+                            <div class="h3 mb-0">@tareasPendientes</div>
+                            <div class="small">Pendientes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card bg-danger text-white h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
+                        </div>
+                        <div>
+                            <div class="h3 mb-0">@tareasVencidas</div>
+                            <div class="small">Vencidas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" placeholder="Buscar tareas..." id="searchInput">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex gap-2 justify-content-md-end mt-2 mt-md-0">
+                            <select class="form-select" id="statusFilter" style="max-width: 200px;">
+                                <option value="">Todos los estados</option>
+                                <option value="activo">Activas</option>
+                                <option value="pendiente">Pendientes</option>
+                                <option value="inactivo">Inactivas</option>
+                            </select>
+                            <button class="btn btn-outline-secondary" id="toggleView">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="tareasContainer">
+            @foreach (var item in Model.Tarea)
+            {
+                <div class="col-lg-4 col-md-6 mb-4 tarea-card">
+                    <div class="card h-100 shadow-sm border-0 hover-shadow">
+                        <div class="card-header bg-transparent border-0 pb-0">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="card-title mb-0 text-truncate">
+                                    @Html.DisplayFor(_ => item.nombreTarea)
+                                </h5>
+                                @{
+                                    var est = (item.estado ?? string.Empty).ToString();
+                                    var e = est.Trim().ToLowerInvariant();
+                                    var badge = "bg-secondary";
+                                    var icon = "fas fa-question-circle";
+
+                                    if (bool.TryParse(e, out var bBool))
+                                    {
+                                        badge = bBool ? "bg-success" : "bg-danger";
+                                        est = bBool ? "Activo" : "Inactivo";
+                                        icon = bBool ? "fas fa-check-circle" : "fas fa-times-circle";
+                                    }
+                                    else if (e == "activo" || e == "activa" || e == "completado" || e == "completada")
+                                    {
+                                        badge = "bg-success";
+                                        icon = "fas fa-check-circle";
+                                    }
+                                    else if (e == "pendiente")
+                                    {
+                                        badge = "bg-warning";
+                                        icon = "fas fa-clock";
+                                    }
+                                    else if (e == "inactivo" || e == "cancelado" || e == "vencido")
+                                    {
+                                        badge = "bg-danger";
+                                        icon = "fas fa-times-circle";
+                                    }
+                                }
+                                <span class="badge @badge">
+                                    <i class="@icon me-1"></i>@est
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="mb-3">
+                                @{
+                                    string fechaDisplay;
+                                    string fechaClass = "";
+                                    string fechaIcon = "fas fa-calendar-alt";
+
+                                    if (item.fechaVencimiento == null)
+                                    {
+                                        fechaDisplay = "Sin fecha límite";
+                                        fechaClass = "text-muted";
+                                    }
+                                    else
+                                    {
+                                        fechaDisplay = string.Format("{0:dd/MM/yyyy}", item.fechaVencimiento);
+
+                                        if (item.fechaVencimiento < DateTime.Now)   
+                                        {
+                                            fechaClass = "text-danger";
+                                            fechaIcon = "fas fa-exclamation-triangle";
+                                        }
+                                        else if (item.fechaVencimiento <= DateTime.Now.AddDays(3)) 
+                                        {
+                                            fechaClass = "text-warning";
+                                            fechaIcon = "fas fa-clock";
+                                        }
+                                        else
+                                        {
+                                            fechaClass = "text-success";
+                                        }
+                                    }
+                                }
+
+                                <div class="@fechaClass mb-2">
+                                    <i class="@fechaIcon me-2"></i>
+                                    <small>@fechaDisplay</small>
+                                </div>
+
+                                <div class="text-muted">
+                                    <i class="fas fa-user me-2"></i>
+                                    <small>Usuario: @Html.DisplayFor(_ => item.IdUsuario)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-transparent border-0 pt-0">
+                            <div class="d-grid gap-2">
+                                <div class="btn-group" role="group">
+                                    <a asp-page="./Details" asp-route-id="@item.Id"
+                                       class="btn btn-outline-info btn-sm">
+                                        <i class="fas fa-eye me-1"></i>Ver
+                                    </a>
+                                    <a asp-page="./Edit" asp-route-id="@item.Id"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Editar
+                                    </a>
+                                    <a asp-page="./Delete" asp-route-id="@item.Id"
+                                       class="btn btn-outline-danger btn-sm">
+                                        <i class="fas fa-trash me-1"></i>Eliminar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-clipboard-list fa-5x text-muted opacity-50"></i>
+            </div>
+            <h3 class="text-muted mb-3">¡No hay tareas aún!</h3>
+            <p class="text-muted mb-4">Comienza creando tu primera tarea para organizar tu trabajo.</p>
+            <a asp-page="Create" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>Crear Primera Tarea
+            </a>
+        </div>
+    }
+</div>
+
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+
+        .hover-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+    .card-title {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .badge {
+        font-size: 0.75em;
+        padding: 0.5em 0.8em;
+    }
+
+    .btn-group .btn {
+        border-radius: 0.375rem;
+    }
+
+        .btn-group .btn:not(:last-child) {
+            margin-right: 0.25rem;
+        }
+
+    .card-header {
+        padding: 1.25rem 1.25rem 0.5rem 1.25rem;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+</style>
+
